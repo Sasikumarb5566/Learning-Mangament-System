@@ -70,14 +70,10 @@ module.exports.getEnrolledCourses = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email }).populate(
-      "enrolledCourses.courseId"
-    );
-
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ success: false, msg: "User not found" });
     }
-
     res
       .status(200)
       .json({ success: true, enrolledCourses: user.enrolledCourses });
@@ -87,5 +83,28 @@ module.exports.getEnrolledCourses = async (req, res) => {
       msg: "Failed to fetch enrolled courses",
       error: err,
     });
+  }
+};
+
+module.exports.myCourse = async (req, res) => {
+  const { email } = req.query;
+
+  try {
+    const fetchId = await User.findOne({ email });
+
+    if (!fetchId) {
+      return res.json({ success: false, msg: "User not found" });
+    }
+
+    const courseIds = fetchId.enrolledCourses.map(course => course.courseId);
+
+    // Fetch course details from courseAvailable collection
+    const courses = await Course.find({ _id: { $in: courseIds } });
+    //console.log(courses)
+    return res.json({ success: true, courses });
+
+  } catch (err) {
+    console.error("Error fetching course details:", err);
+    return res.json({ success: false, msg: "Error in Backend part of myCourse" });
   }
 };

@@ -29,3 +29,7 @@
   export const getEnrolledCourses = async (email) => {
     return axios.get(`${baseUrl}/user/enrolled-courses`, { params: { email } });
   };
+
+  export const myCourse = async(email) => {
+    return axios.get(`${baseUrl}/user/my-course`, {params: {email}});
+  }

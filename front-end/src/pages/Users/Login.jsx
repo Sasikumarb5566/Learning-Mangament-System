@@ -1,37 +1,28 @@
 import React, { useState } from "react";
-import { useAuth } from "../../AuthContext";
 import { useNavigate } from "react-router-dom";
 import NotificationBar from "../../components/notification-bar/NotificationBar";
 import LoginSignup from "../../layout/Users/LoginSignup";
 import { LoginData } from "../../utils/data-validation/SignupData";
-import {
-  verifyLogin,
-} from "../../services/Users/UserServices";
+import { verifyLogin } from "../../services/Users/UserServices";
 
 const Login = () => {
-  const { login } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [notification, setNotification] = useState({
-    message: "",
-    type: "",
-    visible: false,
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [notification, setNotification] = useState({ message: "", type: "", visible: false });
+
+  const showNotification = (message, type) => {
+    setNotification({ message, type, visible: true });
+    setTimeout(() => setNotification((prev) => ({ ...prev, visible: false })), 5000);
+  };
 
   const hideNotification = () => {
     setNotification((prev) => ({ ...prev, visible: false }));
   };
-  const showNotification = (message, type) => {
-    setNotification({ message, type, visible: true });
-    setTimeout(
-      () => setNotification((prev) => ({ ...prev, visible: false })),
-      5000
-    );
+
+  const updateLocalStorage = (email) => {
+    localStorage.setItem("email", email);
   };
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,33 +32,31 @@ const Login = () => {
         setIsLoading(true);
         const response = await verifyLogin(formData);
         const user = response.data;
+
         if (!user.success) {
           showNotification(user.message, "error");
           setIsLoading(false);
           return;
         }
-        login({ email: formData.email });
+
+        updateLocalStorage(formData.email);
+
         showNotification(user.message, "success");
         navigate("/dashboard");
-        setIsLoading(false);
       } catch (error) {
-        console.log("Error in verifying login: ", error);
+        console.error("Error in verifying login:", error);
+        showNotification("Login failed. Please try again.", "error");
+      } finally {
         setIsLoading(false);
       }
     } else {
-      showNotification("Enter valid email and password", "error");
+      showNotification("Enter a valid email and password", "error");
     }
   };
 
   return (
     <div className="bg-[#ecf0fe] flex items-center justify-center min-h-screen">
-      {notification.visible && (
-        <NotificationBar
-          message={notification.message}
-          type={notification.type}
-          onClose={hideNotification}
-        />
-      )}
+      {notification.visible && <NotificationBar {...notification} onClose={hideNotification} />}
       <div className="bg-white p-8 rounded-3xl shadow-xl md:max-w-md w-full max-w-sm z-10">
         <LoginSignup />
         <form onSubmit={handleSubmit}>
@@ -78,9 +67,7 @@ const Login = () => {
               name="email"
               autoComplete="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
               className="border-2 w-full p-3 rounded-full mb-4"
             />
@@ -90,9 +77,7 @@ const Login = () => {
               name="password"
               autoComplete="current-password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
               className="border-2 w-full p-3 rounded-full mb-4"
             />

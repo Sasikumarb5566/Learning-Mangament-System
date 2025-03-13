@@ -8,6 +8,9 @@ import { SignupData } from "../../utils/data-validation/SignupData";
 import { generateOtp, verifyOtp } from "../../services/Users/UserServices";
 
 const UserSignup = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,87 +26,71 @@ const UserSignup = () => {
     visible: false,
   });
 
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, visible: false }));
+  useEffect(() => {
+    const inviterParam = new URLSearchParams(location.search).get("inviter");
+    if (inviterParam) {
+      setFormData((prev) => ({ ...prev, inviter: inviterParam }));
+    }
+  }, [location.search]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
   const showNotification = (message, type) => {
     setNotification({ message, type, visible: true });
     setTimeout(() => setNotification((prev) => ({ ...prev, visible: false })), 5000);
   };
 
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const inviterLinkParam = queryParams.get("inviter");
-    if (inviterLinkParam) {
-      setFormData((prevData) => ({
-        ...prevData,
-        inviter: inviterLinkParam,
-      }));
-    }
-  }, [location.search]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isOtpSent) {
-      const validationResponse = SignupData(formData);
-      console.log(formData.username)
-      if (validationResponse.success) {
-        try {
-          setIsLoading(true);
-          const response = await verifyOtp(formData);
-          const user = response.data;
-          if (!user.success) {
-            showNotification(user.message, "error");
-            setIsLoading(false);
-            return;
-          }
-          showNotification(user.message, "success");
-          navigate("/dashboard",{state: {email: formData.email}});
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error in verifying OTP: ", error);
-          setIsLoading(false);
+    setIsLoading(true);
+  
+    const validationResponse = SignupData(formData);
+    if (!validationResponse.success) {
+      showNotification(validationResponse.message, "error");
+      setIsLoading(false);
+      return;
+    }
+  
+    try {
+      if (isOtpSent) {
+        // Verify OTP and Sign Up
+        const response = await verifyOtp(formData);
+        if (!response.data.success) {
+          showNotification(response.data.message, "error");
+        } else {
+          showNotification(response.data.message, "success");
+  
+          // 🔹 Update localStorage on successful signup
+          localStorage.setItem("email", formData.email);
+  
+          // Navigate to Dashboard
+          navigate("/dashboard");
         }
       } else {
-        showNotification(validationResponse.message, "error");
-        console.log(validationResponse.message);
-      }
-    } else {
-      const validationResponse = SignupData(formData);
-      if (validationResponse.success) {
-        try {
-          setIsLoading(true);
-          const response = await generateOtp(formData);
-          const user = response.data;
-          if (!user.success) {
-            showNotification(user.message, "error");
-            setIsLoading(false);
-            return;
-          }
-          showNotification(user.message, "success");
+        // Generate OTP
+        const response = await generateOtp(formData);
+        if (!response.data.success) {
+          showNotification(response.data.message, "error");
+        } else {
+          showNotification(response.data.message, "success");
           setIsOtpSent(true);
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error in generating OTP: ", error);
-          setIsLoading(false);
         }
-      } else {
-        showNotification(validationResponse.message, "error");
       }
+    } catch (error) {
+      console.error("Error:", error);
+      showNotification("An error occurred. Please try again.", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
-
+  
   return (
     <div className="bg-[#ecf0fe] flex items-center justify-center min-h-screen">
       {notification.visible && (
-        <NotificationBar
-          message={notification.message}
-          type={notification.type}
-          onClose={hideNotification}
-        />
+        <NotificationBar message={notification.message} type={notification.type} />
       )}
       <div className="bg-white p-8 rounded-3xl shadow-xl md:max-w-md w-full max-w-sm">
         <LoginSignup />
@@ -111,77 +98,67 @@ const UserSignup = () => {
           <div className="mt-4">
             <input
               type="text"
-              placeholder="Username"
               name="username"
+              placeholder="Username"
               autoComplete="username"
               value={formData.username}
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
+              onChange={handleInputChange}
               required
               className="border-2 w-full p-3 rounded-full mb-4"
             />
             <input
               type="email"
-              placeholder="abc@gmail.com"
               name="email"
+              placeholder="abc@gmail.com"
               autoComplete="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={handleInputChange}
               required
               className="border-2 w-full p-3 rounded-full mb-4"
             />
             <input
               type="password"
-              placeholder="Create Password"
               name="password"
+              placeholder="Create Password"
               autoComplete="new-password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={handleInputChange}
               required
               className="border-2 w-full p-3 rounded-full mb-4"
             />
           </div>
+
           {isOtpSent && (
             <div className="flex relative flex-col">
-              <div>
-                <p className="text-gray-500 ml-2 text-sm">
-                  <FontAwesomeIcon icon={faInfoCircle} className="mr-1 mt-1" />
-                  OTP will expire in 10 minutes
-                </p>
-              </div>
-              <div>
-                <input
-                  type="number"
-                  placeholder="Enter OTP"
-                  value={formData.otp}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      otp: e.target.value,
-                    })
-                  }
-                  required
-                  className="border-2 w-full p-3 rounded-full mb-4"
-                />
-              </div>
+              <p className="text-gray-500 ml-2 text-sm">
+                <FontAwesomeIcon icon={faInfoCircle} className="mr-1 mt-1" />
+                OTP will expire in 10 minutes
+              </p>
+              <input
+                type="number"
+                name="otp"
+                placeholder="Enter OTP"
+                value={formData.otp}
+                onChange={handleInputChange}
+                required
+                className="border-2 w-full p-3 rounded-full mb-4"
+              />
             </div>
           )}
+
           <button
             type="submit"
-            className="bg-[#4669ff] p-3 rounded-full text-white w-full hover:bg-[#3853cc] transition-all"
+            className={`bg-[#4669ff] p-3 rounded-full text-white w-full transition-all ${
+              isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#3853cc]"
+            }`}
             disabled={isLoading}
           >
             {isLoading ? (
-              <div className="flex space-x-2 justify-center items-center dark:invert p-1">
+              <div className="flex space-x-2 justify-center items-center">
                 <span className="sr-only">Loading...</span>
-                <div className="h-3 w-3 bg-black rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-                <div className="h-3 w-3 bg-black rounded-full animate-bounce [animation-delay:-0.14s]"></div>
-                <div className="h-3 w-3 bg-black rounded-full animate-bounce"></div>
+                <div className="h-3 w-3 bg-white rounded-full animate-bounce"></div>
+                <div className="h-3 w-3 bg-white rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+                <div className="h-3 w-3 bg-white rounded-full animate-bounce [animation-delay:-0.4s]"></div>
               </div>
             ) : isOtpSent ? (
               "Verify and Sign Up"

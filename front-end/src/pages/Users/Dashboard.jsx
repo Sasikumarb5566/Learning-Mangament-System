@@ -13,37 +13,42 @@ import {
 import loginError from "../../assets/login.png";
 import { getCurrentUser } from "../../services/Users/UserServices";
 import NavBar from "../../components/NavBar";
-import { useAuth } from "../../AuthContext";
 
 const Dashboard = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const userEmail = localStorage.getItem("email"); // Retrieve email from localStorage
   const [currentUser, setCurrentUser] = useState({ username: "" });
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await getCurrentUser(user?.email);
-        const details = response.data;
-        setCurrentUser({ username: details.data.username });
+        if (userEmail) {
+          const response = await getCurrentUser(userEmail);
+          const details = response.data;
+          setCurrentUser({ username: details.data.username });
+  
+          // 🔹 Ensure local storage is updated dynamically
+          localStorage.setItem("email", userEmail);
+        }
       } catch (err) {
-        console.error("Error in fetching current user:", err);
+        console.error("Error fetching current user:", err);
       }
     };
-
-    if (user?.email) {
+  
+    if (userEmail) {
       fetchCurrentUser();
       setCourses([
         { id: 1, name: "React Basics", progress: 80 },
         { id: 2, name: "Node.js API Development", progress: 50 },
       ]);
     }
-  }, [user?.email]);
-
-  if (!user?.email) {
+  }, [userEmail]);
+  
+  // If no user email is found, redirect to login
+  if (!userEmail) {
     return (
-      <div className="bg-[#ecf0fe] flex flex-col gap-2 items-center justify-center min-h-screen ">
+      <div className="bg-[#ecf0fe] flex flex-col gap-2 items-center justify-center min-h-screen">
         <div className="flex items-center gap-4 mb-6">
           <img src={loginError} alt="login" className="w-28" />
           <div className="font-bold text-5xl">Go back...</div>

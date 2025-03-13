@@ -1,25 +1,26 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+    // Load email from localStorage when the app starts
+    const [email, setEmail] = useState(localStorage.getItem("email") || "");
 
-  const login = (userData) => {
-    setUser(userData); 
-  };
+    // Function to update email and store it in localStorage
+    const login = (userEmail) => {
+        setEmail(userEmail);
+        localStorage.setItem("email", userEmail); // Store email in localStorage
+    };
 
-  const logout = () => {
-    setUser(null); 
-  };
+    // Function to clear email on logout
+    const logout = () => {
+        setEmail("");
+        localStorage.removeItem("email"); // Remove email from localStorage
+    };
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => {
-  return useContext(AuthContext);
+    return (
+        <AuthContext.Provider value={{ email, login, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };

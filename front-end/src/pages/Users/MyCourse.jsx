@@ -1,29 +1,87 @@
-import { getEnrolledCourses } from "../../services/Users/UserServices";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import NavBar from "../../components/NavBar";
-import { useAuth } from "../../AuthContext";
+import {
+  enrollCourse,
+  myCourse,
+} from "../../services/Users/UserServices";
 
 const MyCourse = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const [userEmail, setUserEmail] = useState(localStorage.getItem("email"));
   const [courses, setCourses] = useState([]);
-  const location = useLocation();
-  const email = location.state?.email;
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    if (!user?.email) return;
+    const handleStorageChange = () => {
+      setUserEmail(localStorage.getItem("email"));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!userEmail) return;
 
     const fetchCourses = async () => {
       try {
-        const response = await getEnrolledCourses(user.email);
-        setCourses(response.data.courses);
+        setLoading(true);
+        const response = await myCourse(userEmail);
+        const enrolledCourses = response.data.courses || [];
+
+        const processedCourses = enrolledCourses.map((course) => {
+          if (course.image?.data) {
+            const base64String = btoa(
+              new Uint8Array(course.image.data.data).reduce(
+                (data, byte) => data + String.fromCharCode(byte),
+                ""
+              )
+            );
+            return {
+              ...course,
+              imageSrc: `data:${course.image.contentType};base64,${base64String}`,
+            };
+          }
+          return { ...course, imageSrc: "/default-image.jpg" }; // Default image
+        });
+
+        setCourses(processedCourses);
       } catch (error) {
         console.error("Error fetching enrolled courses:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCourses();
-  }, [user?.email]);
+  }, [userEmail]);
+
+  useEffect(() => {
+    const showData = () => {
+      console.log("From My course: ", courses);
+    };
+    showData();
+  });
+
+  if (!userEmail) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+        <h2 className="text-3xl font-semibold mb-4">
+          Please log in to view your courses
+        </h2>
+        <button
+          onClick={() => navigate("/")}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+        >
+          Login
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row">
@@ -31,7 +89,9 @@ const MyCourse = () => {
       <div className="p-6 w-full md:ml-64">
         <h2 className="text-2xl font-bold mb-6">My Courses</h2>
 
-        {courses.length === 0 ? (
+        {loading ? (
+          <p className="text-gray-500">Loading courses...</p>
+        ) : courses.length === 0 ? (
           <p className="text-gray-500">
             You are not enrolled in any courses yet.
           </p>
@@ -39,7 +99,7 @@ const MyCourse = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((course) => (
               <div
-                key={course.id}
+                key={course._id}
                 className="bg-white shadow-lg rounded-lg p-4"
               >
                 <img
@@ -56,16 +116,16 @@ const MyCourse = () => {
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-blue-500 h-2 rounded-full"
-                      style={{ width: `${course.progress}%` }}
+                      style={{ width: `${course.progress || 0}%` }}
                     ></div>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
-                    {course.progress}% Completed
+                    {course.progress || 0}% Completed
                   </p>
                 </div>
 
                 <button
-                  onClick={() => navigate(`/course/${course.id}`)}
+                  onClick={() => navigate(`/course/${course._id}`)}
                   className="bg-blue-500 text-white px-4 py-2 rounded w-full mt-4"
                 >
                   Continue Learning
