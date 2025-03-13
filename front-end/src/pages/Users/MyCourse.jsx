@@ -109,7 +109,7 @@ const MyCourse = () => {
                 />
                 <h3 className="text-lg font-semibold mt-4">{course.name}</h3>
                 <p className="text-sm text-gray-500">
-                  Instructor: {course.instructor}
+                  <span className="font-semibold">Instructor:</span> {course.description.author}
                 </p>
 
                 <div className="mt-3">

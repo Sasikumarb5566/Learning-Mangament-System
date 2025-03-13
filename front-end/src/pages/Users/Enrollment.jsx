@@ -60,13 +60,8 @@ const Enrollment = ({ setCourses }) => {
     };
   
     fetchUserEnrolledCourses();
-  }, [userEmail]); 
+  }); 
   
-  useEffect(() => {
-    console.log("Updated Enrolled Courses:", enrolledCourses);
-  }, [enrolledCourses]);
-
-
   const handleEnroll = async (course) => {
     if (enrolledCourses.some((enrolled) => enrolled._id === course._id)) return;
 
@@ -83,8 +78,7 @@ const Enrollment = ({ setCourses }) => {
       console.error("Enrollment failed:", error.response?.data || error.message);
     }
   };
-
-  // Redirect if not logged in
+  
   if (!userEmail) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -126,11 +120,12 @@ const Enrollment = ({ setCourses }) => {
                 course.name.toLowerCase().includes(searchTerm.toLowerCase())
               )
               .map((course) => (
+
                 <CourseCard
                   key={course._id}
                   course={course}
                   isEnrolled={enrolledCourses.some(
-                    (enrolled) => enrolled._id === course._id
+                    (enrolled) => enrolled.courseId === course._id
                   )}
                   onEnroll={handleEnroll}
                 />
