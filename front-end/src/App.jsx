@@ -5,6 +5,7 @@ import Signup from "./pages/Users/Signup";
 import Dashboard from "./pages/Users/Dashboard";
 import Enrollment from "./pages/Users/Enrollment";
 import MyCourse from "./pages/Users/MyCourse";
+import Videos from "./pages/Users/Videos";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/enrollment" element={<Enrollment />} />
           <Route path="/my-course" element={<MyCourse />} />
+          <Route path="/course/:id/videos" element={<Videos />} />
         </Routes>
       </Router>
     </AuthProvider>

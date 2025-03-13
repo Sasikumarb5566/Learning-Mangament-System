@@ -33,3 +33,7 @@
   export const myCourse = async(email) => {
     return axios.get(`${baseUrl}/user/my-course`, {params: {email}});
   }
+
+  export const getCourseVideos = async (courseId) => {
+    return axios.get(`${baseUrl}/api/courses/${courseId}/videos`);
+  };

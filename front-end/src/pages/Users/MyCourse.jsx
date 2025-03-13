@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import NavBar from "../../components/NavBar";
-import { getEnrolledCourses, myCourse } from "../../services/Users/UserServices";
+import {
+  getEnrolledCourses,
+  myCourse,
+} from "../../services/Users/UserServices";
 
 const MyCourse = () => {
   const navigate = useNavigate();
@@ -113,7 +116,7 @@ const MyCourse = () => {
                 </div>
 
                 <button
-                  onClick={() => navigate(`/course/${course._id}`)}
+                  onClick={() => navigate(`/course/${course._id}/videos`)}
                   className="bg-blue-500 text-white px-4 py-2 rounded w-full mt-4"
                 >
                   Continue Learning
