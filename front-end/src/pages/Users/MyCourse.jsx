@@ -1,55 +1,48 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import NavBar from "../../components/NavBar";
-import {
-  enrollCourse,
-  myCourse,
-} from "../../services/Users/UserServices";
+import { getEnrolledCourses, myCourse } from "../../services/Users/UserServices";
 
 const MyCourse = () => {
   const navigate = useNavigate();
-  const [userEmail, setUserEmail] = useState(localStorage.getItem("email"));
+  const userEmail = localStorage.getItem("email");
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const handleStorageChange = () => {
-      setUserEmail(localStorage.getItem("email"));
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
-
-  useEffect(() => {
     if (!userEmail) return;
 
-    const fetchCourses = async () => {
+    const fetchUserCourses = async () => {
       try {
         setLoading(true);
+
         const response = await myCourse(userEmail);
-        const enrolledCourses = response.data.courses || [];
+        const enrollDetails = await getEnrolledCourses(userEmail);
 
-        const processedCourses = enrolledCourses.map((course) => {
-          if (course.image?.data) {
-            const base64String = btoa(
-              new Uint8Array(course.image.data.data).reduce(
-                (data, byte) => data + String.fromCharCode(byte),
-                ""
-              )
-            );
-            return {
-              ...course,
-              imageSrc: `data:${course.image.contentType};base64,${base64String}`,
-            };
-          }
-          return { ...course, imageSrc: "/default-image.jpg" }; // Default image
-        });
+        if (response.data.success) {
+          const mergedCourses = response.data.courses.map((course) => {
+            const courseProgress =
+              enrollDetails.data.enrolledCourses.find(
+                (p) => p.courseId === course._id
+              )?.progress || 0;
 
-        setCourses(processedCourses);
+            // Convert image data if available
+            let imageSrc = "/default-image.jpg"; // Default image
+            if (course.image?.data) {
+              const base64String = btoa(
+                new Uint8Array(course.image.data.data).reduce(
+                  (data, byte) => data + String.fromCharCode(byte),
+                  ""
+                )
+              );
+              imageSrc = `data:${course.image.contentType};base64,${base64String}`;
+            }
+
+            return { ...course, progress: courseProgress, imageSrc };
+          });
+
+          setCourses(mergedCourses);
+        }
       } catch (error) {
         console.error("Error fetching enrolled courses:", error);
       } finally {
@@ -57,7 +50,7 @@ const MyCourse = () => {
       }
     };
 
-    fetchCourses();
+    fetchUserCourses();
   }, [userEmail]);
 
   if (!userEmail) {
@@ -96,15 +89,17 @@ const MyCourse = () => {
                 className="bg-white shadow-lg rounded-lg p-4"
               >
                 <img
-                  src={course.imageSrc || "/default-image.jpg"}
+                  src={course.imageSrc}
                   alt={course.name}
                   className="w-full h-40 object-cover rounded-lg"
                 />
                 <h3 className="text-lg font-semibold mt-4">{course.name}</h3>
                 <p className="text-sm text-gray-500">
-                  <span className="font-semibold">Instructor:</span> {course.description.author}
+                  <span className="font-semibold">Instructor:</span>{" "}
+                  {course.description.author}
                 </p>
 
+                {/* Progress Bar */}
                 <div className="mt-3">
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div

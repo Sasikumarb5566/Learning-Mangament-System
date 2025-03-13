@@ -109,7 +109,7 @@ const Dashboard = () => {
                   key={course.id}
                   className="bg-white p-4 rounded-lg shadow-md"
                 >
-                  <h3 className="text-lg font-semibold">{course.name}</h3>
+                  <h3 className="text-lg font-semibold hover:underline cursor-pointer">{course.name}</h3>
                   <p className="text-gray-600">
                     Progress: {course.progress || 0}%
                   </p>
