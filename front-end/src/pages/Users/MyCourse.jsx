@@ -60,13 +60,6 @@ const MyCourse = () => {
     fetchCourses();
   }, [userEmail]);
 
-  useEffect(() => {
-    const showData = () => {
-      console.log("From My course: ", courses);
-    };
-    showData();
-  });
-
   if (!userEmail) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">

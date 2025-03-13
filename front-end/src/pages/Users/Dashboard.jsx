@@ -11,12 +11,16 @@ import {
 } from "recharts";
 
 import loginError from "../../assets/login.png";
-import { getCurrentUser } from "../../services/Users/UserServices";
+import {
+  getCurrentUser,
+  getEnrolledCourses,
+  myCourse,
+} from "../../services/Users/UserServices";
 import NavBar from "../../components/NavBar";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const userEmail = localStorage.getItem("email"); // Retrieve email from localStorage
+  const userEmail = localStorage.getItem("email");
   const [currentUser, setCurrentUser] = useState({ username: "" });
   const [courses, setCourses] = useState([]);
 
@@ -27,25 +31,44 @@ const Dashboard = () => {
           const response = await getCurrentUser(userEmail);
           const details = response.data;
           setCurrentUser({ username: details.data.username });
-  
-          // 🔹 Ensure local storage is updated dynamically
           localStorage.setItem("email", userEmail);
         }
       } catch (err) {
         console.error("Error fetching current user:", err);
       }
     };
-  
+
     if (userEmail) {
       fetchCurrentUser();
-      setCourses([
-        { id: 1, name: "React Basics", progress: 80 },
-        { id: 2, name: "Node.js API Development", progress: 50 },
-      ]);
     }
   }, [userEmail]);
-  
-  // If no user email is found, redirect to login
+
+  useEffect(() => {
+    const fetchUserEnrolledCourses = async () => {
+      try {
+        const response = await myCourse(userEmail);
+        const enrollDetails = await getEnrolledCourses(userEmail);
+        //console.log("Data:", enrollDetails.data.enrolledCourses);
+
+        if (response.data.success) {
+          const mergedCourses = response.data.courses.map((course) => {
+            const courseProgress =
+              enrollDetails.data.enrolledCourses.find(
+                (p) => p.courseId === course._id
+              )?.progress || 0;
+            return { ...course, progress: courseProgress };
+          });
+
+          setCourses(mergedCourses);
+        }
+      } catch (error) {
+        console.error("Error fetching enrolled courses:", error);
+      }
+    };
+
+    fetchUserEnrolledCourses();
+  }, []);
+
   if (!userEmail) {
     return (
       <div className="bg-[#ecf0fe] flex flex-col gap-2 items-center justify-center min-h-screen">
@@ -74,21 +97,32 @@ const Dashboard = () => {
     <div className="flex flex-col md:flex-row h-screen bg-gray-100">
       <NavBar />
       <div className="flex-1 p-6 mt-16 md:mt-0 md:ml-64">
-        <h2 className="text-2xl font-semibold mb-4">Welcome, {currentUser.username}!</h2>
+        <h2 className="text-2xl font-semibold mb-4">
+          Welcome, {currentUser.username}!
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {courses.map((course) => (
-            <div key={course.id} className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold">{course.name}</h3>
-              <p className="text-gray-600">Progress: {course.progress}%</p>
-              <div className="w-full bg-gray-200 h-3 rounded mt-2">
+          {courses.map(
+            (course) => (
+              (
                 <div
-                  className="bg-[#3853cc] h-3 rounded"
-                  style={{ width: `${course.progress}%` }}
-                ></div>
-              </div>
-            </div>
-          ))}
+                  key={course.id}
+                  className="bg-white p-4 rounded-lg shadow-md"
+                >
+                  <h3 className="text-lg font-semibold">{course.name}</h3>
+                  <p className="text-gray-600">
+                    Progress: {course.progress || 0}%
+                  </p>
+                  <div className="w-full bg-gray-200 h-3 rounded mt-2">
+                    <div
+                      className="bg-[#3853cc] h-3 rounded"
+                      style={{ width: `${course.progress || 0}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )
+            )
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md">
