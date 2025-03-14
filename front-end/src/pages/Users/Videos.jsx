@@ -9,7 +9,8 @@ const Videos = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState(null);
-  const [showPlaylist, setShowPlaylist] = useState(true); // Toggle playlist for mobile
+  const [showPlaylist, setShowPlaylist] = useState(true); 
+  const [courseName, setCourseName] = useState('')
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -17,7 +18,7 @@ const Videos = () => {
         setLoading(true);
         const response = await getCourseVideos(id);
         const datas = response.data;
-        console.log(datas.playlists);
+        setCourseName(datas.courseName);
         setVideos(datas.playlists);
         setSelectedVideo(datas.playlists[0]); // Default to first video
       } catch (error) {
@@ -35,7 +36,7 @@ const Videos = () => {
       <NavBar />
       <div className="flex-1 p-4 md:ml-64 mt-4 ">
         <h2 className="text-2xl font-bold mb-4 text-center md:text-left">
-          Django Web Development
+          {courseName}
         </h2>
 
         {loading ? (

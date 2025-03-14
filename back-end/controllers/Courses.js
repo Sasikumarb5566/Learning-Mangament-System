@@ -119,7 +119,7 @@ module.exports.getPlaylist = async (req, res) => {
     if (!playlist) {
       return res.status(404).json({ error: "Course not found" });
     }
-    return res.json({success: true, playlists:playlist.videos});
+    return res.json({success: true, playlists:playlist.videos, courseName:playlist.name});
     } catch(err) {
       return res.json({success: false, msg:"Error in backend of get Playlist"})
     }

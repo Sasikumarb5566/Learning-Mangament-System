@@ -25,7 +25,7 @@ const saveCourseWithImage = async () => {
         duration: "8 Days",
         author: "Sasikumar B",
         content: [
-          "Introduction to Machine Learning",
+          "Introduction to Web development",
           "HTML Course | From Beginner to Advanced Level",
           "Understand CSS",
           "What is responsive design?",
@@ -38,7 +38,7 @@ const saveCourseWithImage = async () => {
       },
       // ✅ Add YouTube Playlist Videos
       videos: [
-        { id: "l1EssrLxt7E", title: "Introduction to Machine Learning" },
+        { id: "l1EssrLxt7E", title: "Introduction to Web Development" },
         { id: "Rek0NWPCNOc", title: "HTML Course | From Beginner to Advanced Level" },
         { id: "wKPlQkOdpFQ", title: "Understand CSS" },
         { id: "p870o46o1bM", title: "What is responsive design?" },
