@@ -108,3 +108,19 @@ module.exports.myCourse = async (req, res) => {
     return res.json({ success: false, msg: "Error in Backend part of myCourse" });
   }
 };
+
+module.exports.getPlaylist = async (req, res) => {
+  try {
+    const { courseId } = req.params; 
+    if (!courseId) {
+      return res.status(400).json({ error: "Course ID is required" });
+    }
+    const playlist = await Course.findById(courseId);
+    if (!playlist) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+    return res.json({success: true, playlists:playlist.videos});
+    } catch(err) {
+      return res.json({success: false, msg:"Error in backend of get Playlist"})
+    }
+};

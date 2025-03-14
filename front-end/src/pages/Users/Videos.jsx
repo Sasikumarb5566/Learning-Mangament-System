@@ -15,16 +15,11 @@ const Videos = () => {
     const fetchVideos = async () => {
       try {
         setLoading(true);
-
-        // 🔹 Replace this with YouTube playlist videos
-        const youtubePlaylist = [
-          { id: "QFaFIcGhPoM", title: "React Tutorial #1" },
-          { id: "Ke90Tje7VS0", title: "React Tutorial #2" },
-          { id: "0riHps91AzE", title: "React Tutorial #3" },
-        ];
-
-        setVideos(youtubePlaylist);
-        setSelectedVideo(youtubePlaylist[0]); // Default to first video
+        const response = await getCourseVideos(id);
+        const datas = response.data;
+        console.log(datas.playlists);
+        setVideos(datas.playlists);
+        setSelectedVideo(datas.playlists[0]); // Default to first video
       } catch (error) {
         console.error("Error fetching videos:", error);
       } finally {
@@ -57,7 +52,7 @@ const Videos = () => {
                 <div className="mb-6">
                   <div className="w-full max-w-full">
                     <ReactPlayer
-                      url={`https://www.youtube.com/embed/${selectedVideo.id}?modestbranding=1&rel=0&showinfo=0&controls=1&disablekb=1&iv_load_policy=3&fs=0`}
+                      url={`https://www.youtube.com/embed/${selectedVideo.id}?enablejsapi=1&modestbranding=1&rel=0&showinfo=0&controls=1&disablekb=1&iv_load_policy=3&fs=0`}
                       controls
                       width="100%"
                       height="auto"

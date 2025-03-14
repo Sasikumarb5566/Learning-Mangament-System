@@ -10,38 +10,47 @@ mongoose.connect("mongodb://127.0.0.1:27017/lms-users", {
 
 const saveCourseWithImage = async () => {
   try {
-    const imagePath = path.join(
-      __dirname,
-      "assets",
-      "Course-images",
-      "ml.jpg"
-    );
+    const imagePath = path.join(__dirname, "assets", "Course-images", "django.png");
     const imageData = fs.readFileSync(imagePath);
+
     const newCourse = new Course({
-      name: "Machine Learning Fundamentals",
-      price: "Free",
+      name: "Django Web Development",
+      price: "₹199",
       image: {
         data: imageData,
         contentType: "image/jpg",
       },
       description: {
-        title: "Machine Learning Fundamentals",
-        duration: "8 weeks",
+        title: "Django Web Development",
+        duration: "8 Days",
         author: "Sasikumar B",
         content: [
-          "Introduction",
-          "Installation Guide of React.js",
-          "Basic Program",
-          "Advanced Concept",
-          "Project",
-          "Conclusion",
+          "Introduction to Machine Learning",
+          "HTML Course | From Beginner to Advanced Level",
+          "Understand CSS",
+          "What is responsive design?",
+          "How JavaScript works?",
+          "What is DOM?",
+          "Creating CRUD App",
+          "How to host website?"
         ],
         assessmentDate: "09/10/2025",
       },
+      // ✅ Add YouTube Playlist Videos
+      videos: [
+        { id: "l1EssrLxt7E", title: "Introduction to Machine Learning" },
+        { id: "Rek0NWPCNOc", title: "HTML Course | From Beginner to Advanced Level" },
+        { id: "wKPlQkOdpFQ", title: "Understand CSS" },
+        { id: "p870o46o1bM", title: "What is responsive design?" },
+        { id: "2lRQTdpwhFk", title: "How JavaScript works?" },
+        { id: "hRaDYCHqFQQ", title: "What is DOM?" },
+        { id: "XuGaq24wixg", title: "Creating CRUD App" },
+        { id: "Dm0K3x9yCkg", title: "How to host website?" },
+      ],
     });
 
     await newCourse.save();
-    console.log("✅ Course with image saved successfully!");
+    console.log("✅ Course with image and videos saved successfully!");
   } catch (err) {
     console.error("❌ Error:", err);
   } finally {
