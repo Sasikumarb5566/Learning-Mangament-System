@@ -66,6 +66,8 @@ const Enrollment = ({ setCourses }) => {
     if (enrolledCourses.some((enrolled) => enrolled._id === course._id)) return;
 
     try {
+      const ok = window.confirm(`Are you sure to enroll the course?`);
+      if(ok) {
       const response = await enrollCourse({ email: userEmail, courseId: course._id });
       if (response.data.success) {
         const updatedCourses = [...enrolledCourses, course];
@@ -73,7 +75,7 @@ const Enrollment = ({ setCourses }) => {
         console.log("Updated Enrolled Courses:", updatedCourses);
       } else {
         console.log(response.data.msg);
-      }
+      } }
     } catch (error) {
       console.error("Enrollment failed:", error.response?.data || error.message);
     }

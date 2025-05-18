@@ -28,17 +28,14 @@ const NavBar = ({ email }) => {
           />
         </h2>
 
-        <ul className={`space-y-3 ${!isOpen ? "hidden md:block" : ""}`}>
+        <ul className={`space-y-8 ${!isOpen ? "hidden md:block" : ""}`}>
           <li
             className="flex items-center gap-2 cursor-pointer hover:text-gray-300"
             onClick={() => navigate("/my-course")}
           >
             <FaBook /> My Courses
           </li>
-          <li className="flex items-center gap-2 cursor-pointer hover:text-gray-300">
-            <FaRegCalendarCheck /> Assignments
-          </li>
-          <li className="flex items-center gap-2 cursor-pointer hover:text-gray-300">
+          <li className="flex items-center gap-2 cursor-pointer hover:text-gray-300" onClick={() => navigate("/certificate")}>
             <FaTrophy /> Certificates
           </li>
           <li className="flex items-center gap-2 cursor-pointer hover:text-gray-300">

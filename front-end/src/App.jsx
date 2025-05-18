@@ -6,6 +6,9 @@ import Dashboard from "./pages/Users/Dashboard";
 import Enrollment from "./pages/Users/Enrollment";
 import MyCourse from "./pages/Users/MyCourse";
 import Videos from "./pages/Users/Videos";
+import Assessment from "./pages/Users/Assessment";
+import AllCertificates from "./pages/Users/AllCertificates";
+import Certificates from "./components/Certificates";
 
 const App = () => {
   return (
@@ -18,6 +21,9 @@ const App = () => {
           <Route path="/enrollment" element={<Enrollment />} />
           <Route path="/my-course" element={<MyCourse />} />
           <Route path="/course/:id/videos" element={<Videos />} />
+          <Route path="/assessment/:id/:email" element={<Assessment />} />
+          <Route path="/certificate" element={<AllCertificates />} />
+          <Route path="/single-certificate" element={<Certificates />} />
         </Routes>
       </Router>
     </AuthProvider>

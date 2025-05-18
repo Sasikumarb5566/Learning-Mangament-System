@@ -23,6 +23,10 @@ app.use('/course', fetchUser)
 app.use('/course', courses)
 app.use('/user', courses)
 app.use('/api', courses)
+app.use('/save', courses)
+app.use('/progress', courses)
+app.use('/assessment', courses);
+app.use('/courses', courses);
 
 app.listen(port, () => {
     console.log(`Server started at ${port}`); 

@@ -11,6 +11,13 @@ const courseSchema = new mongoose.Schema({
       title: { type: String, required: true }, 
     },
   ],
+  assessment: [
+    {
+      question: {type: String, required: true},
+      options: [],
+      answer: {type: String, required: true}
+    }
+  ]
 
 }, { timestamps: true });
 
